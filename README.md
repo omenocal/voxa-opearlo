@@ -18,13 +18,14 @@ Usage
 ```javascript
 
 const opearloConfig = {
-	opearloUserId: 'opearlo-user-id',
-	opearloAppName: 'opearlo-app-name',
+  opearloUserId: 'opearlo-user-id',
+  opearloAppName: 'opearlo-app-name',
+  opearloApiKey: 'opearlo-api-key',
 };
 
 const skill = require('voxa');
 const voxaOpearlo = require('voxa-opearlo');
 
-voxaOpearlo(skill, opearloConfig)
+voxaOpearlo(skill, opearloConfig);
 
 ```
