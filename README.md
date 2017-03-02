@@ -1,7 +1,7 @@
 Voxa Opearlo
 ===========
 
-A [Opearlo](https://www.npmjs.com/package/opearlo-analytics) plugin for [voxa](https://mediarain.github.io/voxa/)
+An [Opearlo](https://www.npmjs.com/package/opearlo-analytics) plugin for [voxa](https://mediarain.github.io/voxa/)
 
 Installation
 -------------
