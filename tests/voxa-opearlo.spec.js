@@ -90,7 +90,7 @@ describe('Voxa-Opearlo plugin', () => {
   });
 
   it('should register Opearlo analytics on IntentRequest and end the session', () => {
-    const spy = simple.spy(() => ({ reply: 'Question.Ask', to: 'die' }));
+    const spy = simple.spy(() => ({ reply: 'ExitIntent.GeneralExit', to: 'die' }));
     voxaStateMachine.onIntent('ExitIntent', spy);
 
     const event = {
@@ -118,7 +118,7 @@ describe('Voxa-Opearlo plugin', () => {
         expect(reply.session.new).to.equal(false);
         expect(reply.session.attributes.state).to.equal('die');
         expect(reply.msg.statements).to.have.lengthOf(1);
-        expect(reply.msg.statements[0]).to.equal('What time is it?');
+        expect(reply.msg.statements[0]).to.equal('Ok. Goodbye.');
       });
   });
 
