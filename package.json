@@ -4,7 +4,7 @@
   "description": "Integrate Opearlo analytics into your Alexa apps using the voxa framework",
   "main": "index.js",
   "scripts": {
-    "test": "istanbul cover _mocha -- --recursive test",
+    "test": "istanbul cover _mocha -- --recursive tests",
     "test-ci": "JUNIT_REPORT_PATH=junit.xml istanbul cover _mocha -- --recursive --colors --reporter mocha-jenkins-reporter tests",
     "cobertura": "istanbul report cobertura --root coverage",
     "lint": "eslint lib test"
