@@ -4,7 +4,8 @@
   "description": "Integrate Opearlo analytics into your Alexa apps using the voxa framework",
   "main": "index.js",
   "scripts": {
-    "test": "istanbul cover _mocha -- --recursive test",
+    "test": "istanbul cover _mocha -- --recursive tests",
+    "test-ci": "JUNIT_REPORT_PATH=junit.xml istanbul cover _mocha -- --recursive --colors --reporter mocha-jenkins-reporter tests",
     "cobertura": "istanbul report cobertura --root coverage",
     "lint": "eslint lib test"
   },
@@ -18,7 +19,10 @@
     "apps",
     "framework",
     "echo",
-    "amazon"
+    "amazon",
+    "voxa",
+    "analytics",
+    "opearlo"
   ],
   "author": "Rain Agency <npm@rain.agency> (http://rain.agency)",
   "engines": {
@@ -29,8 +33,7 @@
     "bluebird": "^3.4.1",
     "debug": "^2.6.0",
     "lodash": "^4.13.1",
-    "opearlo-analytics": "^0.1.9",
-    "voxa": "^2.0.0"
+    "opearlo-analytics": "^0.1.9"
   },
   "devDependencies": {
     "chai": "^3.5.0",
@@ -41,7 +44,8 @@
     "istanbul": "^0.4.5",
     "mocha": "3.2.0",
     "mocha-jenkins-reporter": "0.3.7",
-    "simple-mock": "^0.7.3"
+    "simple-mock": "^0.7.3",
+    "voxa": "^2.0.0"
   },
   "bugs": {
     "url": "https://github.com/mediarain/voxa-opearlo/issues"
