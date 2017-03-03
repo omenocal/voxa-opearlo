@@ -22,3 +22,20 @@
 	`serverless.yml` -> Serverless configuration
 	`package.json` -> Dependencies
 	`README.md`
+
+For Opearlo integration, you just have to add the userId, appName and apiKey to your local.json file like this:
+
+```
+{
+  "server": {
+    "port": 3000,
+    "hostSkill": true
+  },
+  "opearlo": {
+  	"userId": "YOUR-USER-ID",
+  	"appName": "YOUR-APP-NAME",
+  	"apiKey": "YOUR-API-KEY"
+  }
+}
+
+```

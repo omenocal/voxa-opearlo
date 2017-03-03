@@ -6,16 +6,11 @@ const views = require('./views');
 const variables = require('./variables');
 const states = require('./states');
 const voxaOpearlo = require('voxa-opearlo');
-
-const opearloConfig = {
-  userId: 'tkT8PClpPxMOvPbadGyzOoJKwoX2',
-  appName: 'test',
-  apiKey: 'zgbapwBh8J1FeJ7NeFHe28tSznTuqoPG2qtJRZvE',
-};
+const config = require('../config');
 
 const skill = new Voxa({ variables, views });
 
 states.register(skill);
-voxaOpearlo(skill, opearloConfig);
+voxaOpearlo(skill, config.opearlo);
 
 module.exports = skill;
