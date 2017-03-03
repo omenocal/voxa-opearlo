@@ -16,9 +16,9 @@ const views = require('./views');
 describe('Voxa-Opearlo plugin', () => {
   let voxaStateMachine;
   const opearloConfig = {
-    opearloUserId: 'opearlo-user-id',
-    opearloAppName: 'opearlo-app-name',
-    opearloApiKey: 'opearlo-api-key',
+    userId: 'userId',
+    appName: 'appName',
+    apiKey: 'apiKey',
   };
 
   beforeEach(() => {
@@ -49,7 +49,6 @@ describe('Voxa-Opearlo plugin', () => {
     return voxaStateMachine.execute(event)
       .then((reply) => {
         expect(spy.called).to.be.true;
-        expect(spy.lastCall.args[0].opearloRegistered).to.equal(true);
         expect(reply.session.new).to.equal(true);
         expect(reply.session.attributes.state).to.equal('entry');
         expect(reply.msg.statements).to.have.lengthOf(1);
@@ -83,7 +82,6 @@ describe('Voxa-Opearlo plugin', () => {
     return voxaStateMachine.execute(event)
       .then((reply) => {
         expect(spy.called).to.be.true;
-        expect(spy.lastCall.args[0].opearloRegistered).to.equal(true);
         expect(reply.session.new).to.equal(false);
         expect(reply.session.attributes.state).to.equal('entry');
         expect(reply.msg.statements).to.have.lengthOf(1);
@@ -114,7 +112,6 @@ describe('Voxa-Opearlo plugin', () => {
     return voxaStateMachine.execute(event)
       .then((reply) => {
         expect(spy.called).to.be.true;
-        expect(spy.lastCall.args[0].opearloRegistered).to.equal(true);
         expect(reply.version).to.equal('1.0');
       });
   });
@@ -150,7 +147,6 @@ describe('Voxa-Opearlo plugin', () => {
     return voxaStateMachine.execute(event)
       .then((reply) => {
         expect(spy.called).to.be.true;
-        expect(spy.lastCall.args[0].opearloRegistered).to.equal(true);
         expect(reply.reply).to.equal('BadInput.RepeatLastAskReprompt');
         expect(reply.to).to.equal('invalid-state');
         expect(reply.error.toString()).to.equal('Error: random error');
