@@ -122,6 +122,39 @@ describe('Voxa-Opearlo plugin', () => {
       });
   });
 
+  it('should not register Opearlo analytics on IntentRequest with an invalid state', () => {
+    const spy = simple.spy(() => ({ reply: 'ExitIntent.GeneralExit', to: 'die' }));
+    voxaStateMachine.onState('ExitIntent', spy);
+
+    const event = {
+      request: {
+        type: 'IntentRequest',
+        intent: {
+          name: 'ExitIntent',
+        },
+      },
+      session: {
+        new: false,
+        application: {
+          applicationId: 'appId',
+        },
+        user: {
+          userId: 'user-id',
+        },
+      },
+    };
+
+    voxaOpearlo(voxaStateMachine, opearloConfig);
+    return voxaStateMachine.execute(event)
+      .then((reply) => {
+        expect(spy.called).to.be.false;
+        expect(reply.session.new).to.equal(false);
+        expect(reply.session.attributes).to.be.undefined;
+        expect(reply.msg.statements).to.have.lengthOf(1);
+        expect(reply.msg.statements[0]).to.equal('An unrecoverable error occurred.');
+      });
+  });
+
   it('should register Opearlo analytics on SessionEndedRequest', () => {
     const spy = simple.spy(() => ({ reply: 'ExitIntent.GeneralExit' }));
     voxaStateMachine.onSessionEnded(spy);
