@@ -89,6 +89,39 @@ describe('Voxa-Opearlo plugin', () => {
       });
   });
 
+  it('should register Opearlo analytics on IntentRequest and end the session', () => {
+    const spy = simple.spy(() => ({ reply: 'Question.Ask', to: 'die' }));
+    voxaStateMachine.onIntent('ExitIntent', spy);
+
+    const event = {
+      request: {
+        type: 'IntentRequest',
+        intent: {
+          name: 'ExitIntent',
+        },
+      },
+      session: {
+        new: false,
+        application: {
+          applicationId: 'appId',
+        },
+        user: {
+          userId: 'user-id',
+        },
+      },
+    };
+
+    voxaOpearlo(voxaStateMachine, opearloConfig);
+    return voxaStateMachine.execute(event)
+      .then((reply) => {
+        expect(spy.called).to.be.true;
+        expect(reply.session.new).to.equal(false);
+        expect(reply.session.attributes.state).to.equal('die');
+        expect(reply.msg.statements).to.have.lengthOf(1);
+        expect(reply.msg.statements[0]).to.equal('What time is it?');
+      });
+  });
+
   it('should register Opearlo analytics on SessionEndedRequest', () => {
     const spy = simple.spy(() => ({ reply: 'ExitIntent.GeneralExit' }));
     voxaStateMachine.onSessionEnded(spy);
