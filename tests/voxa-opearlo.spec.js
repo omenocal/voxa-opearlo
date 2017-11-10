@@ -1,10 +1,7 @@
 'use strict';
 
 const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const OpearloAnalytics = require('opearlo-analytics');
-
-chai.use(chaiAsPromised);
 
 const simple = require('simple-mock');
 
@@ -24,7 +21,12 @@ describe('Voxa-Opearlo plugin', () => {
   beforeEach(() => {
     voxaStateMachine = new Voxa({ views });
     simple.mock(OpearloAnalytics, 'recordAnalytics').callbackWith('MOCK TRACKED');
+    simple.mock(OpearloAnalytics, 'registerVoiceEvent').returnWith('MOCK TRACKED');
   });
+
+  afterEach(function(){
+    simple.restore();
+  })
 
   it('should register Opearlo analytics on LaunchRequest', () => {
     const spy = simple.spy(() => ({ reply: 'LaunchIntent.OpenResponse', to: 'entry' }));
@@ -53,8 +55,77 @@ describe('Voxa-Opearlo plugin', () => {
         expect(reply.session.attributes.state).to.equal('entry');
         expect(reply.msg.statements).to.have.lengthOf(1);
         expect(reply.msg.statements[0]).to.equal('Hello! How are you?');
+        expect(OpearloAnalytics.registerVoiceEvent.called).to.be.true;
+        expect(OpearloAnalytics.registerVoiceEvent.calls[0].args[0]).to.equal('user-id')
+        expect(OpearloAnalytics.registerVoiceEvent.calls[0].args[1]).to.equal('IntentRequest')
       });
   });
+
+  it('should register state information', () => {
+    const spy = simple.spy(() => ({ reply: 'LaunchIntent.OpenResponse', to: 'entry' }));
+    voxaStateMachine.onIntent('LaunchIntent', spy);
+
+    const event = {
+      request: {
+        type: 'LaunchRequest',
+      },
+      session: {
+        new: true,
+        application: {
+          applicationId: 'appId',
+        },
+        user: {
+          userId: 'user-id',
+        },
+      },
+    };
+
+    voxaOpearlo(voxaStateMachine, opearloConfig);
+    return voxaStateMachine.execute(event)
+      .then((reply) => {
+        expect(spy.called).to.be.true;
+        expect(reply.session.new).to.equal(true);
+        expect(reply.session.attributes.state).to.equal('entry');
+        expect(reply.msg.statements).to.have.lengthOf(1);
+        expect(reply.msg.statements[0]).to.equal('Hello! How are you?');
+        expect(OpearloAnalytics.registerVoiceEvent.called).to.be.true;
+        expect(OpearloAnalytics.registerVoiceEvent.calls[1].args[0]).to.equal('user-id')
+        expect(OpearloAnalytics.registerVoiceEvent.calls[1].args[1]).to.equal('Custom')
+        expect(OpearloAnalytics.registerVoiceEvent.calls[1].args[2]).to.equal('LaunchIntent')
+        expect(OpearloAnalytics.registerVoiceEvent.calls[1].args[3].reply).to.equal('LaunchIntent.OpenResponse')
+      });
+  })
+
+  it('should register states that don\'t have a reply', () => {
+    const spy = simple.spy(() => ({ to: 'die' }));
+    voxaStateMachine.onIntent('LaunchIntent', spy);
+
+    const event = {
+      request: {
+        type: 'LaunchRequest',
+      },
+      session: {
+        new: true,
+        application: {
+          applicationId: 'appId',
+        },
+        user: {
+          userId: 'user-id',
+        },
+      },
+    };
+
+    voxaOpearlo(voxaStateMachine, opearloConfig);
+    return voxaStateMachine.execute(event)
+      .then((reply) => {
+        expect(spy.called).to.be.true;
+        expect(OpearloAnalytics.registerVoiceEvent.called).to.be.true;
+        expect(OpearloAnalytics.registerVoiceEvent.calls[1].args[0]).to.equal('user-id')
+        expect(OpearloAnalytics.registerVoiceEvent.calls[1].args[1]).to.equal('Custom')
+        expect(OpearloAnalytics.registerVoiceEvent.calls[1].args[2]).to.equal('LaunchIntent')
+        expect(OpearloAnalytics.registerVoiceEvent.calls[1].args[3].reply).to.be.undefined;
+      });
+  })
 
   it('should register Opearlo analytics on IntentRequest', () => {
     const spy = simple.spy(() => ({ reply: 'Question.Ask', to: 'entry' }));
@@ -155,6 +226,7 @@ describe('Voxa-Opearlo plugin', () => {
       });
   });
 
+
   it('should register Opearlo analytics on SessionEndedRequest', () => {
     const spy = simple.spy(() => ({ reply: 'ExitIntent.GeneralExit' }));
     voxaStateMachine.onSessionEnded(spy);
@@ -179,6 +251,7 @@ describe('Voxa-Opearlo plugin', () => {
       .then((reply) => {
         expect(spy.called).to.be.true;
         expect(reply.version).to.equal('1.0');
+        expect(OpearloAnalytics.recordAnalytics.called).to.be.true;
       });
   });
 
@@ -218,4 +291,61 @@ describe('Voxa-Opearlo plugin', () => {
         expect(reply.error.toString()).to.equal('Error: random error');
       });
   });
+
+  it('should not record analytics if the user is ignored', () => {
+    const spy = simple.spy(() => ({ reply: 'ExitIntent.GeneralExit' }));
+    voxaStateMachine.onSessionEnded(spy);
+
+    const event = {
+      request: {
+        type: 'SessionEndedRequest',
+      },
+      session: {
+        new: false,
+        application: {
+          applicationId: 'appId',
+        },
+        user: {
+          userId: 'user-id',
+        },
+      },
+    };
+
+    voxaOpearlo(voxaStateMachine, Object.assign({ignoreUsers: ['user-id']},opearloConfig));
+    return voxaStateMachine.execute(event)
+      .then((reply) => {
+        expect(OpearloAnalytics.recordAnalytics.called).to.not.be.true;
+      });
+  });
+
+   it('should record sessions terminated due to errors as an error', () => {
+    const spy = simple.spy(() => ({ reply: 'ExitIntent.GeneralExit' }));
+    voxaStateMachine.onSessionEnded(spy);
+
+    const event = {
+      request: {
+        type: 'SessionEndedRequest',
+        reason: 'ERROR',
+        error: {
+          message: 'my message'
+        }
+      },
+      session: {
+        new: false,
+        application: {
+          applicationId: 'appId',
+        },
+        user: {
+          userId: 'user-id',
+        },
+      },
+    };
+
+    voxaOpearlo(voxaStateMachine, Object.assign({ignoreUsers: ['user-id']},opearloConfig));
+    return voxaStateMachine.execute(event)
+      .then((reply) => {
+        expect(OpearloAnalytics.registerVoiceEvent.lastCall.args[2]).to.equal('Error');
+      });
+  });
+
 });
